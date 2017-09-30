@@ -66,14 +66,14 @@ export default class RNCallKit {
         _RNCallKit.setup(options);
     }
 
-    static displayIncomingCall(uuid, handle, handleType = 'number', hasVideo = false) {
+    static displayIncomingCall(uuid, handle, handleType = 'number', hasVideo = false, callerName="") {
         if (Platform.OS !== 'ios') return;
-        _RNCallKit.displayIncomingCall(uuid, handle, handleType, hasVideo);
+        _RNCallKit.displayIncomingCall(uuid, handle, handleType, hasVideo, callerName);
     }
 
-    static startCall(uuid, handle, handleType = 'number', hasVideo = false) {
+    static startCall(uuid, handle, handleType = 'number', hasVideo = false, callerName="") {
         if (Platform.OS !== 'ios') return;
-        _RNCallKit.startCall(uuid, handle, handleType, hasVideo);
+        _RNCallKit.startCall(uuid, handle, handleType, hasVideo, callerName);
     }
 
     static reportConnectedOutgoingCallWithUUID(uuid) {

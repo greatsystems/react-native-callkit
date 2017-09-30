@@ -85,7 +85,9 @@ RCT_EXPORT_METHOD(setup:(NSDictionary *)options)
 RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
                                handle:(NSString *)handle
                                handleType:(NSString *)handleType
-                             hasVideo:(BOOL)hasVideo)
+                             hasVideo:(BOOL)hasVideo
+                          callerName:(NSString *)callerName
+                  )
 {
 #ifdef DEBUG
     NSLog(@"[RNCallKit][displayIncomingCall] uuidString = %@", uuidString);
@@ -94,6 +96,7 @@ RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
     CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
     callUpdate.remoteHandle = [[CXHandle alloc] initWithType:_handleType value:handle];
+    callUpdate.localizedCallerName=callerName;
     callUpdate.supportsDTMF = YES;
     // TODO: Holding
     callUpdate.supportsHolding = NO;
@@ -114,7 +117,9 @@ RCT_EXPORT_METHOD(displayIncomingCall:(NSString *)uuidString
 RCT_EXPORT_METHOD(startCall:(NSString *)uuidString
                        handle:(NSString *)handle
                        handleType:(NSString *)handleType
-                      video:(BOOL)video)
+                      video:(BOOL)video
+                  callerName:(NSString *)callerName
+                  )
 {
 #ifdef DEBUG
     NSLog(@"[RNCallKit][startCall] uuidString = %@", uuidString);
@@ -126,8 +131,8 @@ RCT_EXPORT_METHOD(startCall:(NSString *)uuidString
     [startCallAction setVideo:video];
 
     CXTransaction *transaction = [[CXTransaction alloc] initWithAction:startCallAction];
-
-    [self requestTransaction:transaction];
+    
+    [self requestTransaction:transaction callerName:callerName];
 }
 
 RCT_EXPORT_METHOD(endCall:(NSString *)uuidString)
@@ -169,6 +174,11 @@ RCT_EXPORT_METHOD(reportConnectedOutgoingCallWithUUID:(NSString *)uuidString)
 
 - (void)requestTransaction:(CXTransaction *)transaction
 {
+    [self requestTransaction:transaction callerName:nil];
+}
+
+- (void)requestTransaction:(CXTransaction *)transaction callerName:(NSString *)callerName
+{
 #ifdef DEBUG
     NSLog(@"[RNCallKit][requestTransaction] transaction = %@", transaction);
 #endif
@@ -185,6 +195,9 @@ RCT_EXPORT_METHOD(reportConnectedOutgoingCallWithUUID:(NSString *)uuidString)
             if ([[transaction.actions firstObject] isKindOfClass:[CXStartCallAction class]]) {
                 CXStartCallAction *startCallAction = [transaction.actions firstObject];
                 CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
+                if(callerName!=nil){
+                    callUpdate.localizedCallerName=callerName;
+                }
                 callUpdate.remoteHandle = startCallAction.handle;
                 callUpdate.supportsDTMF = YES;
                 callUpdate.supportsHolding = NO;
